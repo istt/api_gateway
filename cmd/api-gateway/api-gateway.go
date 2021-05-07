@@ -10,6 +10,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	_ "github.com/istt/api_gateway"
 	"github.com/istt/api_gateway/internal/app"
+	"github.com/istt/api_gateway/internal/app/api-gateway/instances"
+	"github.com/istt/api_gateway/internal/app/api-gateway/services/impl"
+	"github.com/istt/api_gateway/internal/app/api-gateway/web/rest"
 	"github.com/markbates/pkger"
 )
 
@@ -27,6 +30,8 @@ func main() {
 	app.ConfigWatch(configFile)
 
 	// 3 - bring up components
+
+	instances.UserService = impl.NewUserServiceDummy()
 
 	// 4 - setup the web server
 	srv := fiber.New(fiber.Config{
@@ -59,5 +64,18 @@ func main() {
 
 // setupRoutes setup the route for application
 func setupRoutes(app *fiber.App) {
+	// Auth
+	app.Post("api/login", rest.Login)
 
+	// + Jhipster endpoint for ROLE_USER
+	app.Get("api/account", rest.GetAccount)                                     // getAccount
+	app.Post("api/account", rest.SaveAccount)                                   // saveAccount
+	app.Post("api/account/change-password", rest.ChangePassword)                // ChangePassword
+	app.Post("​api​/account​/reset-password​/finish", rest.FinishPasswordReset) // finishPasswordReset
+	app.Post("api​/account​/reset-password​/init", rest.RequestPasswordReset)   // requestPasswordReset
+
+	// + account public end point
+	app.Get("api/activate", rest.ActivateAccount)  // activateAccount
+	app.Post("api/authenticate", rest.Login)       // isAuthenticated
+	app.Post("api/register", rest.RegisterAccount) // registerAccount
 }
