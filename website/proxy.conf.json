@@ -1,0 +1,13 @@
+{
+  "/api": {
+    "target": "http://127.0.0.1:19060",
+    "secure": false,
+    "changeOrigin": true,
+    "loglevel": "debug"
+  },
+  "/ws": {
+    "target": "http://127.0.0.1:19060",
+    "secure": false,
+    "ws": true
+  }
+}
