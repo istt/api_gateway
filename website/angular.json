@@ -20,11 +20,16 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "demo",
+            "outputPath": "../web",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
+            "allowedCommonJsDependencies": [
+              "lodash",
+              "file-saver",
+              "js-yaml"
+            ],
             "assets": [
               "src/favicon.ico",
               "src/assets"

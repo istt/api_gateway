@@ -118,17 +118,17 @@ export class DashboardComponent implements OnInit {
  new Chart('chart-line',  {
       type: 'line',
       data: this.chart1.data,
-      options: this.chart1.options
+      // options: this.chart1.options
     });
  new Chart('chart-bar',  {
       type: 'bar',
       data: this.chart2.data ,
-      options: this.chart2.options
+      // options: this.chart2.options
     });
  new Chart('chart-doughnut',  {
       type: 'doughnut',
       data: this.chart3.data,
-      options:this.chart3.options
+      // options:this.chart3.options
     });
 
   }

@@ -1,0 +1,3 @@
+# HTTP server listener
+http:
+  listen: "127.0.0.1:8080"
