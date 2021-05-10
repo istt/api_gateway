@@ -1,6 +1,8 @@
 package rest
 
 import (
+	"log"
+
 	jwt "github.com/form3tech-oss/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/istt/api_gateway/internal/app/api-gateway/instances"
@@ -10,6 +12,7 @@ import (
 
 // GetAccount implement api endpoint
 func GetAccount(c *fiber.Ctx) error {
+	log.Print("access account")
 	token := c.Locals("user").(*jwt.Token)
 	claims := token.Claims.(jwt.MapClaims)
 	subject := claims["sub"].(string)

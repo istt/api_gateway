@@ -1,12 +1,13 @@
 package rest
 
 import (
+	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/form3tech-oss/jwt-go"
 	"github.com/gofiber/fiber/v2"
-	"github.com/istt/api_gateway/internal/app"
 	"github.com/istt/api_gateway/internal/app/api-gateway/instances"
+	"github.com/istt/api_gateway/pkg/fiber/middleware"
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 )
 
@@ -19,25 +20,31 @@ func Login(c *fiber.Ctx) error {
 	}
 	ud, err := instances.UserService.GetUserByUsername(c.Context(), input.Username)
 	if err != nil {
-		return fiber.NewError(fiber.StatusUnauthorized, "Invalid login")
+		return fiber.NewError(fiber.StatusUnauthorized, "invalid login")
 	}
 	if !ud.Activated {
-		return fiber.NewError(fiber.StatusExpectationFailed, "Account is not activated")
+		return fiber.NewError(fiber.StatusExpectationFailed, "account is not activated")
 	}
 	if !instances.UserService.CheckPasswordHash(input.Password, ud.Password) {
-		return fiber.NewError(fiber.StatusUnauthorized, "Invalid password")
+		return fiber.NewError(fiber.StatusUnauthorized, "invalid password")
 	}
 
-	token := jwt.New(jwt.SigningMethodHS256)
+	// mimic jhipster claims
+	claims := jwt.MapClaims{
+		"sub":  ud.Login,
+		"auth": strings.Join(ud.Authorities, ","),
+	}
 
-	claims := token.Claims.(jwt.MapClaims)
-	claims["sub"] = ud.Login
-	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
-	claims["authorities"] = ud.Authorities
+	if input.RememberMe {
+		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+	} else {
+		claims["exp"] = time.Now().Add(time.Hour).Unix()
+	}
 
-	t, err := token.SignedString([]byte(app.Config.String("security.jwt-secret")))
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
+	t, err := token.SignedString([]byte(middleware.JWTSECRET))
 	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "Unable to generate token")
+		return fiber.NewError(fiber.StatusInternalServerError, "unable to generate token")
 	}
 	return c.JSON(fiber.Map{"id_token": t})
 }

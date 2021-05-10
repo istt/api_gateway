@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/form3tech-oss/jwt-go"
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 )
 
@@ -19,9 +19,6 @@ type UserService interface {
 
 	// IsValidToken check if current login match the given jwt subject
 	IsValidToken(t *jwt.Token, login string) bool
-
-	// IsValidUser validate one user retrieve from etcd
-	IsValidUser(ctx context.Context, login string, password string) bool
 
 	// RegisterAccount register for a new account
 	RegisterAccount(ctx context.Context, account *shared.ManagedUserDTO) error

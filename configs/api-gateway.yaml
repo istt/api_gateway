@@ -9,3 +9,6 @@ http:
       - "127.0.0.1:3007"
       - "127.0.0.1:3008"
       - "127.0.0.1:3009"
+  # Authentication if need
+  security:
+    jwt-secret: "YWQ3NDMwM2JlZTk4MTVmZDMwZGZkYjhlNjQxNTM1YzQwNzFjNDQ4Nzk5NzQxMTA2N2U0NzVkN2I0YjkzOTgzMDUwY2Q4ODdhYTE2NjZkNWExYzM5N2EyMGI0OTIwOWYzMGNjYzc3NzNmOWFkMDQzYTJmMWQ5MjE0MGFlMDhlNWM="
