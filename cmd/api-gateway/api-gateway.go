@@ -31,7 +31,7 @@ func main() {
 	app.ConfigWatch(configFile)
 
 	// 3 - bring up components
-
+	// + inject UserServiceDummy into application
 	instances.UserService = impl.NewUserServiceDummy()
 
 	// 4 - setup the web server
