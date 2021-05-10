@@ -119,7 +119,7 @@ func setupRoutes(app *fiber.App) {
 func setupAuthJWT(srv *fiber.App) {
 	// JWT Middleware
 	srv.Use(jwtware.New(jwtware.Config{
-		ContextKey: "user",
+		ContextKey: middleware.FIBER_CONTEXT_KEY,
 		// return true to skip middleware
 		Filter: func(c *fiber.Ctx) bool {
 			//log.Printf("Checking jwt on path %s", c.Path())
@@ -130,7 +130,7 @@ func setupAuthJWT(srv *fiber.App) {
 		},
 		SuccessHandler: func(c *fiber.Ctx) error {
 			// declare locals:account to create audit log
-			token := c.Locals("user").(*jwt.Token)
+			token := c.Locals(middleware.FIBER_CONTEXT_KEY).(*jwt.Token)
 			claims := token.Claims.(jwt.MapClaims)
 			subject := claims["sub"].(string)
 			c.Locals("account", subject)

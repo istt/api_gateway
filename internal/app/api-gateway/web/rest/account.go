@@ -3,20 +3,21 @@ package rest
 import (
 	"log"
 
-	jwt "github.com/form3tech-oss/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/istt/api_gateway/internal/app/api-gateway/instances"
 	"github.com/istt/api_gateway/pkg/common/utils"
+	"github.com/istt/api_gateway/pkg/fiber/middleware"
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 )
 
 // GetAccount implement api endpoint
 func GetAccount(c *fiber.Ctx) error {
 	log.Print("access account")
-	token := c.Locals("user").(*jwt.Token)
-	claims := token.Claims.(jwt.MapClaims)
-	subject := claims["sub"].(string)
-	account, err := instances.UserService.GetUserByUsername(c.Context(), subject)
+	login, err := middleware.GetCurrentUserLogin(c)
+	if err != nil {
+		return err
+	}
+	account, err := instances.UserService.GetUserByUsername(c.Context(), login)
 	if err != nil {
 		return err
 	}
@@ -30,22 +31,16 @@ func SaveAccount(c *fiber.Ctx) error {
 	if err := c.BodyParser(&updatedInfo); err != nil {
 		return err
 	}
-	token := c.Locals("user").(*jwt.Token)
-	claims := token.Claims.(jwt.MapClaims)
-	subject := claims["sub"].(string)
-	account, err := instances.UserService.GetUserByUsername(c.Context(), subject)
+	login, err := middleware.GetCurrentUserLogin(c)
+	if err != nil {
+		return err
+	}
+	account, err := instances.UserService.GetUserByUsername(c.Context(), login)
 	if err != nil {
 		return err
 	}
 
 	account.UserDTO = updatedInfo
-	// jsondata, er := json.Marshal(account)
-	// if er != nil {
-	// 	return er
-	// }
-	// if _, err := app.EtcdClient.Put(c.Context(), fmt.Sprintf("U-%s", account.Login), string(jsondata)); err != nil {
-	// 	return err
-	// }
 	if err := instances.UserService.SaveAccount(c.Context(), account); err != nil {
 		return err
 	}
@@ -58,16 +53,17 @@ func ChangePassword(c *fiber.Ctx) error {
 	if err := c.BodyParser(&input); err != nil {
 		return err
 	}
-	token := c.Locals("user").(*jwt.Token)
-	claims := token.Claims.(jwt.MapClaims)
-	subject := claims["sub"].(string)
-	account, err := instances.UserService.GetUserByUsername(c.Context(), subject)
+	login, err := middleware.GetCurrentUserLogin(c)
+	if err != nil {
+		return err
+	}
+	account, err := instances.UserService.GetUserByUsername(c.Context(), login)
 	if err != nil {
 		return err
 	}
 
 	if !instances.UserService.CheckPasswordHash(input.CurrentPassword, account.Password) {
-		return fiber.NewError(fiber.StatusExpectationFailed, "Current password does not match")
+		return fiber.NewError(fiber.StatusExpectationFailed, "current password does not match")
 	}
 
 	hash, err := instances.UserService.HashPassword(input.NewPassword)
