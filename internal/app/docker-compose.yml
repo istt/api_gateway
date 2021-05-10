@@ -1,0 +1,31 @@
+version: '3.7'
+
+services:
+  mysql:
+    image: mysql:latest
+    volumes:
+      - "./db_data:/var/lib/mysql"
+    env_file:
+      - ".env"
+    ports:
+      - "3307:3306"
+    networks:
+      - appmysql
+
+  id_service:
+    container_name: id_service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rezwanulhaque/id-service:latest
+    volumes:
+      - "./logs:/app/lib/logs"
+    ports:
+      - "7001:7001"
+    depends_on:
+      - mysql
+    networks:
+      - appmysql
+networks:
+  appmysql:
+    driver: bridge
