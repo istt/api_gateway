@@ -8,7 +8,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	_ "github.com/istt/api_gateway"
+	"github.com/gofiber/fiber/v2/middleware/proxy"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/istt/api_gateway/internal/app"
 	"github.com/istt/api_gateway/internal/app/api-gateway/instances"
 	"github.com/istt/api_gateway/internal/app/api-gateway/services/impl"
@@ -45,6 +46,16 @@ func main() {
 			return c.Status(code).JSON(fiber.Map{"error": code, "message": err.Error()})
 		},
 	})
+	configureFiber(srv)
+
+	setupRoutes(srv)
+
+	setupProxy(srv)
+	log.Fatal(srv.Listen(app.Config.String("http.listen")))
+}
+
+// configureFiber start the fiber with common settings
+func configureFiber(srv *fiber.App) {
 	staticAsset := filesystem.New(filesystem.Config{
 		Next: func(c *fiber.Ctx) bool {
 			return strings.HasPrefix(c.Path(), "/api")
@@ -52,14 +63,31 @@ func main() {
 		Root: pkger.Dir("/web"),
 	})
 	srv.Use(staticAsset)
+	// + logging
 	srv.Use(logger.New(logger.Config{
-		// Format:     "{\"timestamp\":\"${time}\", \"status\":${status}, \"account\":\"${locals:account}\", \"method\":\"${method}\", \"path\":\"${path}\", \"body\":${body}}\n",
-		// Format:     "${time} ${status} ${locals:account} ${method} ${path} '${queryParams}' '${body}'\n",
 		TimeFormat: "2006-01-02T15:04:05-0700",
 	}))
 
-	setupRoutes(srv)
-	log.Fatal(srv.Listen(app.Config.String("http.listen")))
+	srv.Use(recover.New())
+}
+
+// setupProxy setup the reverse proxy based on
+func setupProxy(srv *fiber.App) {
+	for k, v := range app.Config.StringsMap("http.proxy") {
+		log.Printf("proxy request on /%s to %v", k, v)
+		srv.Use(k, proxy.Balancer(proxy.Config{
+			Servers: v,
+			ModifyRequest: func(c *fiber.Ctx) error {
+				c.Request().Header.Add("X-Real-IP", c.IP())
+				c.Path(c.Path()[len(k)+1:])
+				return nil
+			},
+			ModifyResponse: func(c *fiber.Ctx) error {
+				c.Response().Header.Del(fiber.HeaderServer)
+				return nil
+			},
+		}))
+	}
 }
 
 // setupRoutes setup the route for application

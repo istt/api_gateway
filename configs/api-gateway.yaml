@@ -1,3 +1,11 @@
-# HTTP server listener
+# HTTP server configuration
 http:
+  # server listener
   listen: "127.0.0.1:8080"
+
+  # Proxy path in upstream
+  proxy:
+    /services/s3: 
+      - "127.0.0.1:3007"
+      - "127.0.0.1:3008"
+      - "127.0.0.1:3009"
