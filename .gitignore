@@ -16,6 +16,7 @@
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
+tmp
 
 # Dependency directories (remove the comment below to include it)
 /vendor/
