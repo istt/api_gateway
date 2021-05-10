@@ -7,7 +7,7 @@ services:
     #   - ~/volumes/jhipster/jhipster/mysql/:/var/lib/mysql/
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-      - MYSQL_DATABASE=jhipster
+      - MYSQL_DATABASE=api_gateway
     # If you want to expose these ports outside your dev PC,
     # remove the "127.0.0.1:" prefix
     ports:
