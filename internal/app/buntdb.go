@@ -16,15 +16,15 @@ var (
 func BuntDBConfig() {
 	// koanf defautl values
 	Config.Load(confmap.Provider(map[string]interface{}{
-		"db.path": ":memory:",
+		"buntdb.path": ":memory:",
 	}, "."), nil)
 }
 
 // BuntDBInit initiate database
 func BuntDBInit() {
 	var err error
-	log.Printf("Connecting to database: %s", Config.String("db.path"))
-	BuntDB, err = buntdb.Open(Config.String("db.path"))
+	log.Printf("Connecting to database: %s", Config.String("buntdb.path"))
+	BuntDB, err = buntdb.Open(Config.String("buntdb.path"))
 	if err != nil {
 		panic("failed to connect database")
 	}

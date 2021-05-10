@@ -25,5 +25,4 @@ func TestBuntDB(t *testing.T) {
 			return true
 		})
 	})
-
 }

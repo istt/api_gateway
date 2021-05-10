@@ -28,14 +28,17 @@ func main() {
 	flag.Parse()
 
 	// 1 - set default settings for components.
+	app.BuntDBConfig()
 
 	// 2 - override defaults with configuration file and watch changes
 	app.ConfigInit(configFile)
 	app.ConfigWatch(configFile)
 
 	// 3 - bring up components
+	app.BuntDBInit()
+
 	// + inject UserServiceDummy into application
-	instances.UserService = impl.NewUserServiceDummy()
+	instances.UserService = impl.NewUserServiceBuntDB("U:")
 
 	// 4 - setup the web server
 	srv := fiber.New(fiber.Config{

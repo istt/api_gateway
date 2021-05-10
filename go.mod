@@ -18,6 +18,7 @@ require (
 	github.com/tidwall/gjson v1.7.5 // indirect
 	github.com/valyala/fasthttp v1.24.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
+	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
 	golang.org/x/sys v0.0.0-20210507161434-a76c4d0a0096 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
