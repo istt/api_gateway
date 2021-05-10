@@ -1,0 +1,2 @@
+# Docker-compose file for MongoDB
+# Run with `docker-compose -f deployments/docker/mongodb.yaml up -d`
