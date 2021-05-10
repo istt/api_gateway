@@ -1,9 +1,9 @@
-# `/docs`
+# `api-gateway`
 
-Design and user documents (in addition to your godoc generated documentation).
+The API Gateway features is a lightweight replacement for JHipster API Gateway.
 
-Examples:
+### API Endpoints:
 
-* https://github.com/gohugoio/hugo/tree/master/docs
-* https://github.com/openshift/origin/tree/master/docs
-* https://github.com/dapr/dapr/tree/master/docs
+- `POST api/authenticate`: Login with username, password. System will return a JWT bearer token to login.
+- `GET api/account`: Retrieve the current logged in account information
+- `POST api/account`: Save current account preferences
