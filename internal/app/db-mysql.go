@@ -1,60 +1,50 @@
 package app
 
 import (
-	"database/sql"
 	"fmt"
-	"os"
+	"log"
 
+	"github.com/knadh/koanf/providers/confmap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+)
+
+var (
+	// DBConn hold the connection to database
+	MysqlDB *gorm.DB
 )
 
 func DBMysqlConfig() {
 	//Open connection to database
-	db, err := gorm.Open(mysql.New(mysql.Config{
-		DriverName:                "MysqlDriver",
-		DSN:                       "",
-		Conn:                      nil,
-		SkipInitializeWithVersion: false,
-		DefaultStringSize:         256,
-		DefaultDatetimePrecision:  new(int),
-		DisableDatetimePrecision:  true,
-		DontSupportRenameIndex:    true,
-		DontSupportRenameColumn:   true,
-		DontSupportForShareClause: false,
-	}), &gorm.Config{})
-
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close(gorm.Config)
+	Config.Load(confmap.Provider(map[string]interface{}{
+		// "mysql.dsn": "gorm:gorm@tcp(127.0.0.1:3306)/gorm?charset=utf8&parseTime=True&loc=Local",
+		"mysql.user": "root",
+		"mysql.pass": "",
+		"mysql.host": "127.0.0.1",
+		"mysql.port": 3306,
+		"mysql.name": "api_gateway",
+	}, "."), nil)
 }
 
-var (
-	Client *sql.DB
-
-	username = os.Getenv("MYSQL_IDS_USERNAME")
-	password = os.Getenv("MYSQL_IDS_PASSWORD")
-	host     = os.Getenv("MYSQL_IDS_HOST")
-	port     = os.Getenv("MYSQL_IDS_PORT")
-	schema   = os.Getenv("MYSQL_IDS_SCHEMA")
-)
-
 func DBMysqlInit() {
-	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8",
-		username, password, host, port, schema,
-	)
 	var err error
-	Client, err = sql.Open("mysql", dataSourceName)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+		Config.MustString("mysql.user"),
+		Config.String("mysql.pass"),
+		Config.MustString("mysql.host"),
+		Config.MustInt("mysql.port"),
+		Config.MustString("mysql.name"),
+	)
+	log.Printf("Connecting to database: %s", Config.String("db.dsn"))
+	db, err := gorm.Open(mysql.New(mysql.Config{
+		DSN: dsn,
+	}), &gorm.Config{})
 	if err != nil {
-		logger.Error("connecting to database failed: ", err)
-		panic(err)
+		panic("failed to connect database")
 	}
 
-	if err = Client.Ping(); err != nil {
-		panic(err)
+	MysqlDB = db
 
-	}
-	logger.Info("database successfully configured")
+	log.Println("Connection Opened to MysqlDB")
+
 }
