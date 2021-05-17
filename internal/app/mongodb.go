@@ -24,7 +24,8 @@ func MongoDBConfig() {
 		"mongodb.username": "root",
 		"mongodb.password": "",
 		"mongodb.host":     "127.0.0.1",
-		"mongodb.port":     "27017",
+		"mongodb.port":     27017,
+		"mongodb.authdb":   "",
 		"mongodb.name":     "test",
 	}, "."), nil)
 
@@ -45,8 +46,8 @@ func MongoDBInit() {
 	// 	Config.MustString("mongodb.host"),
 	// 	Config.MustInt("mongodb.port"),
 	// )
-
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017/"))
+	// FIXME: using fmt.Sprintf
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://username:password@localhost:27017/authDB"))
 	if err != nil {
 		log.Fatal(err)
 	}
