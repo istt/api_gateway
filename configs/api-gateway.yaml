@@ -15,4 +15,4 @@ http:
 
 # buntDB configuration
 buntdb:
-  path: "build/bunt.db"
+  path: "build/package/bunt.db"
