@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -22,24 +21,32 @@ var (
 // MongoDBConfig provide default settings for MongoDB
 func MongoDBConfig() {
 	Config.Load(confmap.Provider(map[string]interface{}{
-		"mongodb.user":     "root",
+		"mongodb.username": "root",
 		"mongodb.password": "",
-		"mongodb.host":     "localhost27017",
-		"mongodb.name":     "api-gateway",
+		"mongodb.host":     "127.0.0.1",
+		"mongodb.port":     "27017",
+		"mongodb.name":     "test",
 	}, "."), nil)
 
 }
+
+const (
+	SchemeMongoDB    = "mongodb"
+	SchemeMongoDBSRV = "mongodb+srv"
+)
 
 // MongoDBInit create mongodb connection and assign it back to var MongoDB above
 func MongoDBInit() {
 	var err error
 
-	mongodsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
-		Config.MustString("mongodb.user"),
-		Config.String("mongodb.password"),
-		Config.MustString("mongodb.host"),
-	)
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongodsn))
+	// mongodb := fmt.Sprintf("%s:%s@%s:%d/test?retryWrites=true&w=majority",
+	// 	Config.MustString("mongodb.username"),
+	// 	Config.String("mongodb.password"),
+	// 	Config.MustString("mongodb.host"),
+	// 	Config.MustInt("mongodb.port"),
+	// )
+
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017/"))
 	if err != nil {
 		log.Fatal(err)
 	}
