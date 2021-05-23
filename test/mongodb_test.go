@@ -22,7 +22,7 @@ func TestMongoDB(t *testing.T) {
 	t.Log(dbnames)
 
 	// test db
-	app.MongoDB.ListCollectionNames(context.TODO(), nil)
+	app.MongoDB.ListCollectionNames(context.TODO(), bson.D{})
 	if err != nil {
 		t.Fatal(err)
 

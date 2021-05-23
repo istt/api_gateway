@@ -47,7 +47,7 @@ func MongoDBInit() {
 	// 	Config.MustInt("mongodb.port"),
 	// )
 	// FIXME: using fmt.Sprintf
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://username:password@localhost:27017/authDB"))
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017/"))
 	if err != nil {
 		log.Fatal(err)
 	}
