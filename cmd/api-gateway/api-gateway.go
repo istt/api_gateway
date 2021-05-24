@@ -28,15 +28,15 @@ func main() {
 	flag.Parse()
 
 	// 1 - set default settings for components.
-
+	app.MongoDBConfig()
 	// 2 - override defaults with configuration file and watch changes
 	app.ConfigInit(configFile)
 	app.ConfigWatch(configFile)
 
 	// 3 - bring up components
-	// + inject UserServiceDummy into application
-	instances.UserService = impl.NewUserServiceDummy()
-
+	app.MongoDBInit()
+	// + inject UserServiceMongoDB into application
+	instances.UserService = impl.NewUserServiceMongodb()
 	// 4 - setup the web server
 	srv := fiber.New(fiber.Config{
 		BodyLimit: 50 * 1024 * 1024,
