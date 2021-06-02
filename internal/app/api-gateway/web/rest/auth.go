@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -20,7 +21,7 @@ func Login(c *fiber.Ctx) error {
 	}
 	ud, err := instances.UserService.GetUserByUsername(c.Context(), input.Username)
 	if err != nil {
-		return fiber.NewError(fiber.StatusUnauthorized, "invalid login")
+		return fiber.NewError(fiber.StatusUnauthorized, fmt.Sprintf("unable to find data: %s | %s", input.Username, err.Error()))
 	}
 	if !ud.Activated {
 		return fiber.NewError(fiber.StatusExpectationFailed, "account is not activated")

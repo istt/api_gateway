@@ -11,7 +11,6 @@ import (
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -41,12 +40,8 @@ func (svc *UserServiceMongodb) CheckPasswordHash(password, hash string) bool {
 func (svc *UserServiceMongodb) GetUserByUsername(ctx context.Context, login string) (*shared.ManagedUserDTO, error) {
 	result := &shared.ManagedUserDTO{}
 	// Search mongodb collection for user info
-	dbres := svc.userCollection.FindOne(ctx, bson.M{"Login": login}, &options.FindOneOptions{})
-	if dbres.Err() != nil {
-		return result, dbres.Err()
-	}
-	if err := dbres.Decode(result); err != nil {
-		return result, err
+	if err := svc.userCollection.FindOne(ctx, bson.M{"login": login}).Decode(result); err != nil {
+		return nil, err
 	}
 	return result, nil
 
@@ -76,8 +71,7 @@ func (svc *UserServiceMongodb) IsValidToken(t *jwt.Token, login string) bool {
 
 // RegisterAccount register for a new account
 func (svc *UserServiceMongodb) RegisterAccount(ctx context.Context, account *shared.ManagedUserDTO) error {
-	userdata, _ := bson.Marshal(account)
-	Insertdata, err := app.MongoDB.Collection("account").InsertOne(context.Background(), userdata)
+	Insertdata, err := svc.userCollection.InsertOne(context.Background(), account)
 	if err != nil {
 		return err
 	}
@@ -88,9 +82,8 @@ func (svc *UserServiceMongodb) RegisterAccount(ctx context.Context, account *sha
 
 // SaveAccount save the current account
 func (svc *UserServiceMongodb) SaveAccount(ctx context.Context, account *shared.ManagedUserDTO) error {
-	saveInfo := &shared.ManagedUserDTO{}
-	users := app.MongoDB.Collection("account")
-	saveRes, err := users.InsertOne(context.Background(), saveInfo)
+	users := svc.userCollection
+	saveRes, err := users.InsertOne(context.Background(), account)
 	if saveRes != nil {
 		return err
 
@@ -100,13 +93,12 @@ func (svc *UserServiceMongodb) SaveAccount(ctx context.Context, account *shared.
 
 }
 func (svc *UserServiceMongodb) EditInfor(ctx context.Context, account *shared.ManagedUserDTO) error {
-
 	filter := &shared.ManagedUserDTO{}
 	editor := bson.D{{
 		Key:   "login",
 		Value: nil,
 	}}
-	editResult, err := app.MongoDB.Collection("user").UpdateOne(context.TODO(), filter, editor)
+	editResult, err := svc.userCollection.UpdateOne(context.TODO(), filter, editor)
 
 	if err != nil {
 		log.Fatal(err)
@@ -118,7 +110,7 @@ func (svc *UserServiceMongodb) EditInfor(ctx context.Context, account *shared.Ma
 
 func (svc *UserServiceMongodb) DeleteAccountInfo(ctx context.Context, account *shared.ManagedUserDTO) error {
 	Delete := &shared.ManagedUserDTO{}
-	deleteResult, err := app.MongoDB.Collection("user").DeleteMany(context.TODO(), Delete)
+	deleteResult, err := svc.userCollection.DeleteMany(context.TODO(), Delete)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -15,7 +15,7 @@ type UserDTO struct {
 
 // ManagedUserDTO store information about user from admin point of view
 type ManagedUserDTO struct {
-	UserDTO
+	UserDTO          `bson:",inline"`
 	Password         string `json:"password"`
 	CreatedBy        string `json:"createdBy"`
 	CreatedDate      string `json:"createdDate"`
