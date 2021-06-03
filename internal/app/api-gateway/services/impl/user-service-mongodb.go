@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/istt/api_gateway/internal/app"
@@ -71,46 +72,63 @@ func (svc *UserServiceMongodb) IsValidToken(t *jwt.Token, login string) bool {
 
 // RegisterAccount register for a new account
 func (svc *UserServiceMongodb) RegisterAccount(ctx context.Context, account *shared.ManagedUserDTO) error {
-	Insertdata, err := svc.userCollection.InsertOne(context.Background(), account)
-	if err != nil {
-		return err
-	}
 
-	fmt.Println("Insert sucess!!", Insertdata.InsertedID)
-	return nil
+	Insertdata, err := svc.userCollection.InsertOne(ctx, account)
+	if err != nil {
+		fmt.Println("Insert info error", err)
+		return err
+	} else {
+		fmt.Println("Insert info sucess!!", reflect.TypeOf(Insertdata))
+		return nil
+	}
 }
 
 // SaveAccount save the current account
 func (svc *UserServiceMongodb) SaveAccount(ctx context.Context, account *shared.ManagedUserDTO) error {
-	users := svc.userCollection
-	saveRes, err := users.InsertOne(context.Background(), account)
+
+	saveRes, err := svc.userCollection.InsertOne(context.Background(), account)
 	if saveRes != nil {
 		return err
-
 	} else {
+		fmt.Println("save sucess!!!", saveRes.InsertedID)
 		return nil
 	}
 
 }
-func (svc *UserServiceMongodb) EditInfor(ctx context.Context, account *shared.ManagedUserDTO) error {
-	filter := &shared.ManagedUserDTO{}
-	editor := bson.D{{
-		Key:   "login",
-		Value: nil,
-	}}
-	editResult, err := svc.userCollection.UpdateOne(context.TODO(), filter, editor)
+
+//change password
+func (svc *UserServiceMongodb) editAccount(ctx context.Context, login string, email string, password string, firstName string, lastName string) (*shared.ManagedUserDTO, error) {
+	editInfo := &shared.ManagedUserDTO{}
+	result, err := svc.userCollection.UpdateByID(ctx, bson.M{"login": login},
+		bson.M{"$set": bson.M{"password": password, "email": email, "firstName": firstName, "lastName": lastName}})
 
 	if err != nil {
 		log.Fatal(err)
 
 	}
-	fmt.Printf("Matched %v edit %v documents.\n", editResult.MatchedCount, editResult.ModifiedCount)
-	return nil
+	fmt.Printf("updated %v documents.\n", result.ModifiedCount)
+	return editInfo, nil
 }
 
-func (svc *UserServiceMongodb) DeleteAccountInfo(ctx context.Context, account *shared.ManagedUserDTO) error {
-	Delete := &shared.ManagedUserDTO{}
-	deleteResult, err := svc.userCollection.DeleteMany(context.TODO(), Delete)
+func (svc *UserServiceMongodb) changePassword(ctx context.Context, currentPassword string, newPassword string) (*shared.PasswordChangeDTO, error) {
+	changepassword := &shared.PasswordChangeDTO{}
+	changeRes, err := svc.userCollection.UpdateOne(ctx, bson.M{"currentPassword": currentPassword},
+		bson.M{"$set": bson.M{"NewPassword": newPassword}})
+
+	if err != nil {
+		log.Fatal(err)
+		fmt.Println("fail!!", err)
+	} else {
+		fmt.Println("password changed!!\n", changeRes.ModifiedCount)
+
+	}
+	return changepassword, nil
+}
+
+// delete account
+func (svc *UserServiceMongodb) DeleteAccount(ctx context.Context, account *shared.ManagedUserDTO) error {
+
+	deleteResult, err := svc.userCollection.DeleteMany(context.TODO(), account)
 	if err != nil {
 		log.Fatal(err)
 	}
