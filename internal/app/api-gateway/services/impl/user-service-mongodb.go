@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"reflect"
 
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/istt/api_gateway/internal/app"
@@ -42,6 +41,9 @@ func (svc *UserServiceMongodb) GetUserByUsername(ctx context.Context, login stri
 	result := &shared.ManagedUserDTO{}
 	// Search mongodb collection for user info
 	if err := svc.userCollection.FindOne(ctx, bson.M{"login": login}).Decode(result); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return result, nil
@@ -50,8 +52,12 @@ func (svc *UserServiceMongodb) GetUserByUsername(ctx context.Context, login stri
 
 // HashPassword hash the given password with any kind of encrypt for password. Can be MD5, SHA1 or BCrypt
 func (svc *UserServiceMongodb) HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	if err != nil {
+		log.Println(err)
+
+	}
+	return string(hash), nil
 }
 
 // IsValidToken check if current login match the given jwt subject
@@ -75,54 +81,40 @@ func (svc *UserServiceMongodb) RegisterAccount(ctx context.Context, account *sha
 
 	Insertdata, err := svc.userCollection.InsertOne(ctx, account)
 	if err != nil {
-		fmt.Println("Insert info error", err)
+		fmt.Printf("Insert info error %s", err)
 		return err
 	} else {
-		fmt.Println("Insert info sucess!!", reflect.TypeOf(Insertdata))
+		fmt.Printf("Insert info sucess!! %+v", Insertdata)
 		return nil
 	}
 }
 
 // SaveAccount save the current account
 func (svc *UserServiceMongodb) SaveAccount(ctx context.Context, account *shared.ManagedUserDTO) error {
-
 	saveRes, err := svc.userCollection.InsertOne(context.Background(), account)
-	if saveRes != nil {
+	if err != nil {
 		return err
 	} else {
-		fmt.Println("save sucess!!!", saveRes.InsertedID)
+		fmt.Printf("save sucess!!! %s", saveRes.InsertedID)
 		return nil
 	}
 
 }
 
 //change password
-func (svc *UserServiceMongodb) editAccount(ctx context.Context, login string, email string, password string, firstName string, lastName string) (*shared.ManagedUserDTO, error) {
-	editInfo := &shared.ManagedUserDTO{}
-	result, err := svc.userCollection.UpdateByID(ctx, bson.M{"login": login},
-		bson.M{"$set": bson.M{"password": password, "email": email, "firstName": firstName, "lastName": lastName}})
+func (svc *UserServiceMongodb) changePassword(ctx context.Context, id string, newPassword string, password *shared.PasswordChangeDTO) error {
+
+	changePassword, err := svc.userCollection.UpdateOne(ctx,
+		bson.M{"id": id},
+		bson.D{{"$set", bson.D{{"newPassword", newPassword}}}})
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 
-	}
-	fmt.Printf("updated %v documents.\n", result.ModifiedCount)
-	return editInfo, nil
-}
-
-func (svc *UserServiceMongodb) changePassword(ctx context.Context, currentPassword string, newPassword string) (*shared.PasswordChangeDTO, error) {
-	changepassword := &shared.PasswordChangeDTO{}
-	changeRes, err := svc.userCollection.UpdateOne(ctx, bson.M{"currentPassword": currentPassword},
-		bson.M{"$set": bson.M{"NewPassword": newPassword}})
-
-	if err != nil {
-		log.Fatal(err)
-		fmt.Println("fail!!", err)
 	} else {
-		fmt.Println("password changed!!\n", changeRes.ModifiedCount)
-
+		fmt.Printf("password changed!!! %v", changePassword.ModifiedCount)
+		return nil
 	}
-	return changepassword, nil
 }
 
 // delete account
