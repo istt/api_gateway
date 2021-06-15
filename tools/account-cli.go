@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/istt/api_gateway/internal/app"
@@ -12,7 +13,7 @@ import (
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 )
 
-var configFile, username, email, password, authorities, prefix string
+var configFile, username, email, password, authorities string
 
 func main() {
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
@@ -21,7 +22,6 @@ func main() {
 	flag.StringVar(&email, "email", "admin@localhost", "Email to create")
 	flag.StringVar(&password, "password", "admin", "Password to create")
 	flag.StringVar(&authorities, "authorities", "ROLE_USER,ROLE_ADMIN", "Authorities of user")
-	flag.StringVar(&prefix, "prefix", "U:", "BuntDB user prefix to use")
 	flag.Parse()
 
 	// 1 - set default settings for components.
@@ -43,12 +43,11 @@ func main() {
 
 	err = instances.UserService.SaveAccount(context.TODO(), &shared.ManagedUserDTO{
 		UserDTO: shared.UserDTO{
-			Id:          username,
 			Login:       username,
 			Email:       email,
 			LangKey:     "en",
 			Activated:   true,
-			Authorities: []string{"ROLE_USER", "ROLE_ADMIN"},
+			Authorities: strings.Split(authorities, ","),
 		},
 		CreatedBy:        "system",
 		CreatedDate:      time.Now().Local().Format("2006-01-02"),

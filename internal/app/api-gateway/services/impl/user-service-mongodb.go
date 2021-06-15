@@ -10,6 +10,7 @@ import (
 	"github.com/istt/api_gateway/pkg/fiber/services"
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -91,40 +92,22 @@ func (svc *UserServiceMongodb) RegisterAccount(ctx context.Context, account *sha
 
 // SaveAccount save the current account
 func (svc *UserServiceMongodb) SaveAccount(ctx context.Context, account *shared.ManagedUserDTO) error {
-	saveRes, err := svc.userCollection.InsertOne(context.Background(), account)
-	if err != nil {
-		return err
+	if account.Id == "" {
+		res, err := svc.userCollection.InsertOne(context.Background(), account)
+		if err != nil {
+			return err
+		}
+		if objId, ok := res.InsertedID.(primitive.ObjectID); ok {
+			account.Id = objId.Hex()
+		}
 	} else {
-		fmt.Printf("save sucess!!! %s", saveRes.InsertedID)
-		return nil
+		res, err := svc.userCollection.UpdateByID(context.Background(), account.Id, account)
+		if err != nil {
+			return err
+		}
+		if res.MatchedCount == 0 {
+			return fmt.Errorf("no records match")
+		}
 	}
-
-}
-
-//change password
-func (svc *UserServiceMongodb) changePassword(ctx context.Context, id string, newPassword string, password *shared.PasswordChangeDTO) error {
-
-	changePassword, err := svc.userCollection.UpdateOne(ctx,
-		bson.M{"id": id},
-		bson.D{{"$set", bson.D{{"newPassword", newPassword}}}})
-
-	if err != nil {
-		return err
-
-	} else {
-		fmt.Printf("password changed!!! %v", changePassword.ModifiedCount)
-		return nil
-	}
-}
-
-// delete account
-func (svc *UserServiceMongodb) DeleteAccount(ctx context.Context, account *shared.ManagedUserDTO) error {
-
-	deleteResult, err := svc.userCollection.DeleteMany(context.TODO(), account)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("Deleted %v in collection.", deleteResult.DeletedCount)
 	return nil
 }

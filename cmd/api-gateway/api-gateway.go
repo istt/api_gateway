@@ -17,6 +17,7 @@ import (
 	"github.com/istt/api_gateway/internal/app/api-gateway/services/impl"
 	"github.com/istt/api_gateway/internal/app/api-gateway/web/rest"
 	"github.com/istt/api_gateway/pkg/fiber/middleware"
+	"github.com/istt/api_gateway/pkg/fiber/middleware/filter"
 	"github.com/markbates/pkger"
 )
 
@@ -113,6 +114,14 @@ func setupRoutes(app *fiber.App) {
 	app.Get("api/activate", rest.ActivateAccount)  // activateAccount
 	app.Post("api/authenticate", rest.Login)       // isAuthenticated
 	app.Post("api/register", rest.RegisterAccount) // registerAccount
+
+	// + user Management routes
+	app.Get("api/authorities", middleware.HasAuthority("ROLE_ADMIN"), rest.GetAuthorities)
+	app.Get("api/admin/users", middleware.HasAuthority("ROLE_ADMIN"), filter.New(), rest.GetAllUser)
+	app.Get("api/admin/users/:id", middleware.HasAuthority("ROLE_ADMIN"), rest.GetUser)
+	app.Post("api/admin/users", middleware.HasAuthority("ROLE_ADMIN"), rest.CreateUser)
+	app.Put("api/admin/users", middleware.HasAuthority("ROLE_ADMIN"), rest.UpdateUser)
+	app.Delete("api/admin/users/:id", middleware.HasAuthority("ROLE_ADMIN"), rest.DeleteUser)
 }
 
 // setupAuthJWT provide JWT for non-user related authentication
@@ -126,6 +135,7 @@ func setupAuthJWT(srv *fiber.App) {
 			return strings.HasPrefix(c.Path(), "/api/activate") ||
 				strings.HasPrefix(c.Path(), "/api/authenticate") ||
 				strings.HasPrefix(c.Path(), "/api/register") ||
+				strings.HasPrefix(c.Path(), "/api/public") ||
 				strings.HasPrefix(c.Path(), "/api/account/reset-password")
 		},
 		SuccessHandler: func(c *fiber.Ctx) error {

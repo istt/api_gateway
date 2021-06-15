@@ -3,7 +3,7 @@ module github.com/istt/api_gateway
 go 1.14
 
 require (
-	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/form3tech-oss/jwt-go v3.2.2+incompatible
 	github.com/go-delve/delve v1.6.0 // indirect
 	github.com/gofiber/fiber/v2 v2.9.0
