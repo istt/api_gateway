@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"log"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -18,6 +19,7 @@ import (
 func GetAllUser(c *fiber.Ctx) error {
 	predicate, ok := c.Locals("filter").(filter.Filter)
 	if ok {
+		log.Printf("Found predicate: %+v", predicate)
 		return GetAllUserWithPredicate(c, predicate)
 	}
 	cur, err := app.MongoDB.Collection("user").Find(c.Context(), bson.D{})
