@@ -23,6 +23,16 @@ $ journalctl -u lab.soibe.xyz.service -f
 $ 
 ```
 
+#### Build Tool account-cli
+
+
+```bash
+$ # go build -o [outputFile] [srcFile]
+$ go build  -o build/package/account-cli tools/account-cli.go
+```
+
+Upload to server to create new account for api-gateway
+
 
 #### CLI for frontend deployment
 
