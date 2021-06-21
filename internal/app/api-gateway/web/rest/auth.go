@@ -23,6 +23,9 @@ func Login(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusUnauthorized, fmt.Sprintf("unable to find data: %s | %s", input.Username, err.Error()))
 	}
+	if ud == nil {
+		return fiber.NewError(fiber.StatusForbidden, "invalid username or password")
+	}
 	if !ud.Activated {
 		return fiber.NewError(fiber.StatusExpectationFailed, "account is not activated")
 	}

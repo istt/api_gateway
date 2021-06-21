@@ -10,7 +10,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
-	"github.com/gofiber/fiber/v2/middleware/recover"
 	jwtware "github.com/gofiber/jwt/v2"
 	"github.com/istt/api_gateway/internal/app"
 	"github.com/istt/api_gateway/internal/app/api-gateway/instances"
@@ -79,7 +78,7 @@ func configureFiber(srv *fiber.App) {
 		TimeFormat: "2006-01-02T15:04:05-0700",
 	}))
 
-	srv.Use(recover.New())
+	// srv.Use(recover.New())
 }
 
 // setupProxy setup the reverse proxy based on
