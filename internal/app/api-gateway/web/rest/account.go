@@ -117,9 +117,12 @@ func RegisterAccount(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	exists.UserDTO = user
-	exists.Password = hash
-	if err := instances.UserService.SaveAccount(c.Context(), exists); err != nil {
+	newAccount := shared.ManagedUserDTO{
+		UserDTO:  user,
+		Password: hash,
+	}
+	log.Printf("saving data to database: %+v", newAccount)
+	if err := instances.UserService.SaveAccount(c.Context(), &newAccount); err != nil {
 		return err
 	}
 	return c.JSON(user)
