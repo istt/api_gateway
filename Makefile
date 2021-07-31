@@ -7,6 +7,7 @@ GOSTATICBUILD=CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-w -extld
 clean:
 	rm -f build/package/*
 
+# update dependencies
 go-update:
 	go get -u ./...
 

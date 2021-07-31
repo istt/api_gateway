@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/form3tech-oss/jwt-go"
 	"github.com/gofiber/fiber/v2"
-	"github.com/istt/api_gateway/internal/app/api-gateway/instances"
-	"github.com/istt/api_gateway/pkg/fiber/middleware"
+	"github.com/golang-jwt/jwt"
+	"github.com/istt/api_gateway/pkg/fiber/authjwt/consts"
+	"github.com/istt/api_gateway/pkg/fiber/instances"
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 )
 
@@ -46,7 +46,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
-	t, err := token.SignedString([]byte(middleware.JWTSECRET))
+	t, err := token.SignedString([]byte(consts.JWTSECRET))
 	if err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "unable to generate token")
 	}

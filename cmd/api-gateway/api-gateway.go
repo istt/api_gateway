@@ -5,17 +5,16 @@ import (
 	"log"
 	"strings"
 
-	"github.com/form3tech-oss/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
-	jwtware "github.com/gofiber/jwt/v2"
 	"github.com/istt/api_gateway/internal/app"
-	"github.com/istt/api_gateway/internal/app/api-gateway/instances"
-	"github.com/istt/api_gateway/internal/app/api-gateway/services/impl"
+	"github.com/istt/api_gateway/internal/app/api-gateway/repositories"
+	authImpl "github.com/istt/api_gateway/internal/app/api-gateway/services/impl"
 	"github.com/istt/api_gateway/internal/app/api-gateway/web/rest"
-	"github.com/istt/api_gateway/pkg/fiber/middleware"
+	"github.com/istt/api_gateway/pkg/fiber/authjwt"
+	authApi "github.com/istt/api_gateway/pkg/fiber/authjwt/web/rest"
 	"github.com/istt/api_gateway/pkg/fiber/middleware/filter"
 	"github.com/markbates/pkger"
 )
@@ -29,6 +28,7 @@ func main() {
 
 	// 1 - set default settings for components.
 	app.MongoDBConfig()
+
 	// 2 - override defaults with configuration file and watch changes
 	app.ConfigInit(configFile)
 	app.ConfigWatch(configFile)
@@ -36,7 +36,8 @@ func main() {
 	// 3 - bring up components
 	app.MongoDBInit()
 	// + inject UserServiceMongoDB into application
-	instances.UserService = impl.NewUserServiceMongodb()
+	userRepo := repositories.NewUserRepositoryBuntDB(app.Config.MustString("buntdb.path"))
+	userSvc := authImpl.NewUserServiceDummy()
 	// 4 - setup the web server
 	srv := fiber.New(fiber.Config{
 		BodyLimit: 50 * 1024 * 1024,
@@ -52,13 +53,11 @@ func main() {
 	configureFiber(srv)
 
 	// + jwt secret support
-	middleware.JWTSECRET = app.Config.String("http.security.jwt-secret")
-	if (middleware.JWTSECRET) != "" {
-		setupAuthJWT(srv)
-	}
-
+	authjwt.USER_RESOURCE = authApi.NewDefaultUserResource(userSvc, userRepo)
+	authjwt.ACCOUNT_RESOURCE = authApi.NewDefaultAccountResource(userSvc)
+	authjwt.SetupAuthJWT(srv, app.Config.MustString("security.jwt-secret"), app.Config.Strings("security.skip-auth")...)
+	authjwt.SetupRoutes(srv)
 	setupRoutes(srv)
-
 	setupProxy(srv)
 
 	log.Fatal(srv.Listen(app.Config.String("http.listen")))
@@ -115,39 +114,10 @@ func setupRoutes(app *fiber.App) {
 	app.Post("api/register", rest.RegisterAccount) // registerAccount
 
 	// + user Management routes
-	app.Get("api/authorities", middleware.HasAuthority("ROLE_ADMIN"), rest.GetAuthorities)
-	app.Get("api/admin/users", middleware.HasAuthority("ROLE_ADMIN"), filter.New(), rest.GetAllUser)
-	app.Get("api/admin/users/:id", middleware.HasAuthority("ROLE_ADMIN"), rest.GetUser)
-	app.Post("api/admin/users", middleware.HasAuthority("ROLE_ADMIN"), rest.CreateUser)
-	app.Put("api/admin/users", middleware.HasAuthority("ROLE_ADMIN"), rest.UpdateUser)
-	app.Delete("api/admin/users/:id", middleware.HasAuthority("ROLE_ADMIN"), rest.DeleteUser)
-}
-
-// setupAuthJWT provide JWT for non-user related authentication
-func setupAuthJWT(srv *fiber.App) {
-	// JWT Middleware
-	srv.Use(jwtware.New(jwtware.Config{
-		ContextKey: middleware.FIBER_CONTEXT_KEY,
-		// return true to skip middleware
-		Filter: func(c *fiber.Ctx) bool {
-			//log.Printf("Checking jwt on path %s", c.Path())
-			return strings.HasPrefix(c.Path(), "/api/activate") ||
-				strings.HasPrefix(c.Path(), "/api/authenticate") ||
-				strings.HasPrefix(c.Path(), "/api/register") ||
-				strings.HasPrefix(c.Path(), "/api/public") ||
-				strings.HasPrefix(c.Path(), "/api/account/reset-password")
-		},
-		SuccessHandler: func(c *fiber.Ctx) error {
-			// declare locals:account to create audit log
-			token := c.Locals(middleware.FIBER_CONTEXT_KEY).(*jwt.Token)
-			claims := token.Claims.(jwt.MapClaims)
-			subject := claims["sub"].(string)
-			c.Locals("account", subject)
-			return c.Next()
-		},
-		SigningKey:    []byte(middleware.JWTSECRET),
-		SigningMethod: "HS512",
-	}))
-	srv.Get("api/account", middleware.HasAuthority("ROLE_USER"), rest.GetAccount)   // getAccount
-	srv.Post("api/account", middleware.HasAuthority("ROLE_USER"), rest.SaveAccount) // saveAccount
+	app.Get("api/authorities", authjwt.HasAnyAuthority("ROLE_ADMIN"), rest.GetAuthorities)
+	app.Get("api/admin/users", authjwt.HasAnyAuthority("ROLE_ADMIN"), filter.New(), rest.GetAllUser)
+	app.Get("api/admin/users/:id", authjwt.HasAnyAuthority("ROLE_ADMIN"), rest.GetUser)
+	app.Post("api/admin/users", authjwt.HasAnyAuthority("ROLE_ADMIN"), rest.CreateUser)
+	app.Put("api/admin/users", authjwt.HasAnyAuthority("ROLE_ADMIN"), rest.UpdateUser)
+	app.Delete("api/admin/users/:id", authjwt.HasAnyAuthority("ROLE_ADMIN"), rest.DeleteUser)
 }

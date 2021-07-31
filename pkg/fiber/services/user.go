@@ -3,9 +3,11 @@ package services
 import (
 	"context"
 
-	"github.com/form3tech-oss/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 )
+
+var USER_SVC UserService
 
 type UserService interface {
 	// CheckPasswordHash compare password with hash

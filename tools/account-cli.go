@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/istt/api_gateway/internal/app"
-	"github.com/istt/api_gateway/internal/app/api-gateway/instances"
 	"github.com/istt/api_gateway/internal/app/api-gateway/services/impl"
+	"github.com/istt/api_gateway/pkg/fiber/instances"
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 )
 

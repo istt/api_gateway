@@ -1,15 +1,13 @@
 package rest
 
 import (
-	"log"
+	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/istt/api_gateway/internal/app"
-	"github.com/istt/api_gateway/internal/app/api-gateway/instances"
 	"github.com/istt/api_gateway/pkg/common/utils"
-	"github.com/istt/api_gateway/pkg/fiber/middleware/filter"
-	"github.com/istt/api_gateway/pkg/fiber/middleware/filter/mgo"
+	"github.com/istt/api_gateway/pkg/fiber/instances"
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,37 +15,11 @@ import (
 
 // GetAllUser get a user
 func GetAllUser(c *fiber.Ctx) error {
-	predicate, ok := c.Locals("filter").(filter.Filter)
-	if ok {
-		log.Printf("Found predicate: %+v", predicate)
-		return GetAllUserWithPredicate(c, predicate)
-	}
-	cur, err := app.MongoDB.Collection("user").Find(c.Context(), bson.D{})
+	entities, err := instances.UserRepo.FindAll()
 	if err != nil {
 		return err
 	}
-	entities := make([]shared.UserDTO, 0)
-	if err := cur.All(c.Context(), &entities); err != nil {
-		return err
-	}
-	c.Set("X-Total-Count", "0")
-	return c.JSON(entities)
-}
-
-func GetAllUserWithPredicate(c *fiber.Ctx, predicate filter.Filter) error {
-	filterMongo := mgo.NewFilterMongo(&predicate)
-	filterMap, findOptions, err := filterMongo.MarshalBSON()
-	if err != nil {
-		return err
-	}
-	cur, err := app.MongoDB.Collection("user").Find(c.Context(), filterMap, findOptions)
-	if err != nil {
-		return err
-	}
-	entities := make([]shared.UserDTO, 0)
-	if err := cur.All(c.Context(), &entities); err != nil {
-		return err
-	}
+	c.Set("X-Total-Count", fmt.Sprint(len(entities)))
 	return c.JSON(entities)
 }
 

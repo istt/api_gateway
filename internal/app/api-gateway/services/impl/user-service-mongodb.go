@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/form3tech-oss/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/istt/api_gateway/internal/app"
 	"github.com/istt/api_gateway/pkg/fiber/services"
 	"github.com/istt/api_gateway/pkg/fiber/shared"

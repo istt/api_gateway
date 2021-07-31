@@ -2,6 +2,8 @@ package filter
 
 import "github.com/gofiber/fiber/v2"
 
+const ContextKeyDefault = "filter"
+
 // Config defines the config for middleware.
 type Config struct {
 	// Next defines a function to skip this middleware when returned true.
@@ -15,7 +17,7 @@ type Config struct {
 // ConfigDefault is the default config
 var ConfigDefault = Config{
 	Next:       nil,
-	ContextKey: "filter",
+	ContextKey: ContextKeyDefault,
 }
 
 // Helper function to set default values

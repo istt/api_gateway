@@ -4,16 +4,15 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/istt/api_gateway/internal/app/api-gateway/instances"
-	"github.com/istt/api_gateway/pkg/common/utils"
-	"github.com/istt/api_gateway/pkg/fiber/middleware"
+	"github.com/istt/api_gateway/pkg/fiber/authjwt/utils"
+	"github.com/istt/api_gateway/pkg/fiber/instances"
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 )
 
 // GetAccount implement api endpoint
 func GetAccount(c *fiber.Ctx) error {
 	log.Print("access account")
-	login, err := middleware.GetCurrentUserLogin(c)
+	login, err := utils.GetCurrentUserLogin(c)
 	if err != nil {
 		return err
 	}
@@ -31,7 +30,7 @@ func SaveAccount(c *fiber.Ctx) error {
 	if err := c.BodyParser(&updatedInfo); err != nil {
 		return err
 	}
-	login, err := middleware.GetCurrentUserLogin(c)
+	login, err := utils.GetCurrentUserLogin(c)
 	if err != nil {
 		return err
 	}
@@ -53,7 +52,7 @@ func ChangePassword(c *fiber.Ctx) error {
 	if err := c.BodyParser(&input); err != nil {
 		return err
 	}
-	login, err := middleware.GetCurrentUserLogin(c)
+	login, err := utils.GetCurrentUserLogin(c)
 	if err != nil {
 		return err
 	}
