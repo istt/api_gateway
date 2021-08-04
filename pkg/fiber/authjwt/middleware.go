@@ -9,6 +9,7 @@ import (
 	jwt "github.com/golang-jwt/jwt"
 	"github.com/istt/api_gateway/pkg/fiber/authjwt/consts"
 	"github.com/istt/api_gateway/pkg/fiber/authjwt/web/rest"
+	"github.com/istt/api_gateway/pkg/fiber/middleware/filter"
 )
 
 var ACCOUNT_RESOURCE rest.AccountResource
@@ -63,7 +64,7 @@ func SetupRoutes(app *fiber.App) {
 
 	// + user Management routes
 	app.Get("api/authorities", HasAuthority("ROLE_ADMIN"), USER_RESOURCE.GetAuthorities)
-	app.Get("api/admin/users", HasAuthority("ROLE_ADMIN"), USER_RESOURCE.GetAllUser)
+	app.Get("api/admin/users", HasAuthority("ROLE_ADMIN"), filter.New(), USER_RESOURCE.GetAllUser)
 	app.Get("api/admin/users/:id", HasAuthority("ROLE_ADMIN"), USER_RESOURCE.GetUser)
 	app.Post("api/admin/users", HasAuthority("ROLE_ADMIN"), USER_RESOURCE.CreateUser)
 	app.Put("api/admin/users", HasAuthority("ROLE_ADMIN"), USER_RESOURCE.UpdateUser)

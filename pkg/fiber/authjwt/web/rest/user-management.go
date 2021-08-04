@@ -2,11 +2,13 @@ package rest
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/istt/api_gateway/pkg/fiber/authjwt/utils"
+	"github.com/istt/api_gateway/pkg/fiber/middleware/filter"
 	"github.com/istt/api_gateway/pkg/fiber/services"
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 )
@@ -33,6 +35,9 @@ func NewDefaultUserResource(svc services.UserService, repo services.UserReposito
 }
 
 func (r *DefaultUserResource) GetAllUser(c *fiber.Ctx) error {
+	if predicate, ok := c.Locals(filter.ContextKeyDefault).(filter.Filter); ok {
+		log.Printf("find all user with predicate: %+v", predicate)
+	}
 	rows, err := r.Repo.FindAll()
 	if err != nil {
 		return err
