@@ -19,11 +19,11 @@ const (
 	OpEndsWith       = "endswith"       // Ends With
 	OpDoesNotContain = "doesnotcontain" // Does Not Contain
 	// Numeric Operators
-	OpLt         = "lt"         // Less Than
-	OpLte        = "lte"        // Less Than or Equal
-	OpGte        = "gte"        // Greater Than or Equal
-	OpGt         = "gt"         // Greater Than
-	OpRange      = "Range"      //perators
+	OpLt  = "lt"  // Less Than
+	OpLte = "lte" // Less Than or Equal
+	OpGte = "gte" // Greater Than or Equal
+	OpGt  = "gt"  // Greater Than
+	// Range Operators
 	OpIn         = "in"         // In array of values
 	OpNotIn      = "notin"      // Not In array of values
 	OpBetween    = "between"    // Between values
@@ -66,7 +66,7 @@ func (kov KeyvalueOperator) Validate() error {
 		if kov.Value == "" {
 			return fmt.Errorf("operator %s require exactly 1 parameter", kov.Operator)
 		}
-	case OpRange, OpBetween, OpNotBetween:
+	case OpBetween, OpNotBetween:
 		if len(kov.Values) != 2 {
 			return fmt.Errorf("operator %s require exactly 2 parameters", kov.Operator)
 		}
@@ -104,7 +104,7 @@ func (kov KeyvalueOperator) IsSingle() bool {
 
 func (kov KeyvalueOperator) IsDouble() bool {
 	switch kov.Operator {
-	case OpRange, OpBetween, OpNotBetween:
+	case OpBetween, OpNotBetween:
 		return true
 	default:
 		return false
