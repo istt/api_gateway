@@ -52,7 +52,11 @@ func (r *DefaultUserResource) GetUser(c *fiber.Ctx) error {
 	}
 	user, err := r.Repo.FindById(id)
 	if err != nil {
-		return err
+		userByLogin, err := r.Repo.FindByLogin(id)
+		if err != nil {
+			return fiber.NewError(fiber.StatusNotFound, err)
+		}
+		return c.JSON(userByLogin)
 	}
 	return c.JSON(user)
 }
@@ -97,6 +101,7 @@ func (r *DefaultUserResource) CreateUser(c *fiber.Ctx) error {
 	return c.JSON(user.UserDTO)
 }
 
+// UpdateUser update the user information
 func (r *DefaultUserResource) UpdateUser(c *fiber.Ctx) error {
 	var user shared.ManagedUserDTO
 	if err := c.BodyParser(&user); err != nil {
@@ -129,13 +134,20 @@ func (r *DefaultUserResource) UpdateUser(c *fiber.Ctx) error {
 	return c.JSON(user.UserDTO)
 }
 
+// DeleteUser try to delete one row from user table, which can have ID or Login match given path variable
 func (r *DefaultUserResource) DeleteUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "" {
 		return fiber.ErrBadRequest
 	}
 	if err := r.Repo.DeleteById(id); err != nil {
-		return err
+		userWithLogin, err := r.Repo.FindByLogin(id)
+		if err != nil {
+			return err
+		}
+		if err := r.Repo.Delete(userWithLogin); err != nil {
+			return fiber.NewError(fiber.StatusNotFound, err.Error())
+		}
 	}
 	return c.SendStatus(fiber.StatusNoContent)
 }
