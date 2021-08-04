@@ -59,7 +59,7 @@ func (r *DefaultUserResource) GetUser(c *fiber.Ctx) error {
 	if err != nil {
 		userByLogin, err := r.Repo.FindByLogin(id)
 		if err != nil {
-			return fiber.NewError(fiber.StatusNotFound, err)
+			return fiber.NewError(fiber.StatusNotFound, err.Error())
 		}
 		return c.JSON(userByLogin)
 	}
