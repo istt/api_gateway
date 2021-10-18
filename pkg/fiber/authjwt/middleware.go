@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	jwtware "github.com/gofiber/jwt/v2"
-	jwt "github.com/golang-jwt/jwt"
+	jwtware "github.com/gofiber/jwt/v3"
+	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/istt/api_gateway/pkg/fiber/authjwt/consts"
 	"github.com/istt/api_gateway/pkg/fiber/authjwt/web/rest"
 	"github.com/istt/api_gateway/pkg/fiber/middleware/filter"
