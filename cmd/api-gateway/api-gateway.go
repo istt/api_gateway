@@ -23,6 +23,7 @@ import (
 
 var configFile string
 
+// main start an API gateway application based on given configuration
 func main() {
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	flag.StringVar(&configFile, "config", "configs/api-gateway.yaml", "API Gateway configuration file")

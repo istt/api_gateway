@@ -1,0 +1,27 @@
+<aside class="sidebar shadow-sm">
+  <div class="sidebar-profile d-flex flex-column justify-content-center pt-5 pb-3">
+    <div class="picture-wrapper mb-4">
+      <div class="user-picture m-auto text-primary">
+        <fa-icon icon="user-circle" size="4x"></fa-icon>
+      </div>
+    </div>
+    <div class="profile-details text-center pb-4">
+      <p class="mb-0 text-uppercase name" jhiTranslate="global.title"></p>
+      <small class="text-uppercase role" jhiTranslate="global.subtitle"></small>
+    </div>
+  </div>
+  <div class="sidebar-search pt-1 pb-1 pl-3 pr-3">
+    <input type="search" class="form-control rounded-pill" name="search" placeholder="Search ..." />
+  </div>
+  <nav class="sidebar-menu pt-3 pb-3">
+    <ul class="menu-items" *jhiHasAnyAuthority="'ROLE_USER'">
+      <li class="menu-header">Entities</li>
+      <li>
+        <a (click)="toggleSidebar()" routerLink="/entity-name" routerLinkActive="active">
+          <fa-icon icon="cogs"></fa-icon>
+          <span jhiTranslate="global.menu.entities.entityName">EntityName</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</aside>

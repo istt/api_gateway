@@ -9,6 +9,7 @@ import { Account } from 'app/core/auth/account.model';
 import { AccountService } from 'app/core/auth/account.service';
 import { LoginService } from 'app/login/login.service';
 import { ProfileService } from 'app/layouts/profiles/profile.service';
+import { LayoutService } from '../layout.service';
 
 @Component({
   selector: 'jhi-navbar',
@@ -24,6 +25,7 @@ export class NavbarComponent implements OnInit {
   account: Account | null = null;
 
   constructor(
+    private layoutService: LayoutService,
     private loginService: LoginService,
     private translateService: TranslateService,
     private sessionStorageService: SessionStorageService,
@@ -66,4 +68,13 @@ export class NavbarComponent implements OnInit {
   toggleNavbar(): void {
     this.isNavbarCollapsed = !this.isNavbarCollapsed;
   }
+
+  // + sidebar
+  toggleSidebarPin(): void {
+    this.layoutService.toggleSidebarPin();
+  }
+  toggleSidebar(): void {
+    this.layoutService.toggleSidebar();
+  }
+
 }

@@ -1,4 +1,9 @@
-<nav data-cy="navbar" class="navbar navbar-dark navbar-expand-md bg-dark">
+<nav data-cy="navbar" class="navbar navbar-dark navbar-expand-md bg-dark fixed-top flex-fill">
+  <!-- sidebar toggler -->
+  <a *ngIf="account !== null" class="navbar-toggler d-lg-none ml-1" href="javascript:void(0);" aria-label="Toggle sidebar" (click)="toggleSidebar()">
+    <fa-icon icon="compass"></fa-icon>
+  </a>
+
   <a class="navbar-brand logo" routerLink="/" (click)="collapseNavbar()">
     <span class="logo-img"></span>
     <span jhiTranslate="global.title" class="navbar-title">Website</span>
@@ -25,25 +30,6 @@
             <span jhiTranslate="global.menu.home">Home</span>
           </span>
         </a>
-      </li>
-      <!-- jhipster-needle-add-element-to-menu - JHipster will add new menu items here -->
-      <li
-        *ngSwitchCase="true"
-        ngbDropdown
-        class="nav-item dropdown pointer"
-        display="dynamic"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        <a class="nav-link dropdown-toggle" ngbDropdownToggle href="javascript:void(0);" id="entity-menu" data-cy="entity">
-          <span>
-            <fa-icon icon="th-list"></fa-icon>
-            <span jhiTranslate="global.menu.entities.main">Entities</span>
-          </span>
-        </a>
-        <ul class="dropdown-menu" ngbDropdownMenu aria-labelledby="entity-menu">
-          <!-- jhipster-needle-add-entity-to-menu - JHipster will add entities to the menu here -->
-        </ul>
       </li>
       <li
         *jhiHasAnyAuthority="'ROLE_ADMIN'"

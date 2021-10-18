@@ -1,13 +1,14 @@
 <jhi-page-ribbon></jhi-page-ribbon>
-
-<div>
+<div class="wrapper default-theme" [ngClass]="getClasses()">
   <router-outlet name="navbar"></router-outlet>
-</div>
-
-<div class="container-fluid">
-  <div class="card jh-card">
-    <router-outlet></router-outlet>
-  </div>
-
-  <jhi-footer></jhi-footer>
+  <main>
+    <router-outlet name="sidebar" *ngIf="isAuthenticated()"></router-outlet>
+    <div class="container-fluid pages px-md-4 py-md-4">
+      <div class="card jh-card">
+        <router-outlet></router-outlet>
+      </div>
+      <jhi-footer></jhi-footer>
+    </div>
+    <div class="overlay" (click)="toggleSidebar()"></div>
+  </main>
 </div>
