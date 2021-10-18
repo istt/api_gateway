@@ -4,8 +4,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/form3tech-oss/jwt-go"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/istt/api_gateway/internal/app/api-gateway/instances"
 	"github.com/istt/api_gateway/pkg/fiber/middleware"
 	"github.com/istt/api_gateway/pkg/fiber/shared"

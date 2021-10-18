@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	jwt "github.com/form3tech-oss/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v2"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 // JWTSECRET hold the JWT secret for encode and decode
