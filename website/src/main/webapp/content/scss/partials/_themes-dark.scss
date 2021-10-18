@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
 @import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
 
-$bg-color: #222 !default;
-$navbar-bg-color: #242939 !default;
-$navbar-color: #6e7899 !default;
-$sidebar-bg-color: #000 !default;
-$sidebar-color: #c4cff9 !default;
-$sidebar-icon-color: #f2f3f8 !default;
-$border-color: #f2f3f8 !default;
+$dark-bg-color: #222 !default;
+$dark-navbar-bg-color: #242939 !default;
+$dark-navbar-color: #6e7899 !default;
+$dark-sidebar-bg-color: #000 !default;
+$dark-sidebar-color: #c4cff9 !default;
+$dark-sidebar-icon-color: #f2f3f8 !default;
+$dark-border-color: #f2f3f8 !default;
 
 body {
   font-family: 'Poppins', 'Roboto', sans-serif;
@@ -15,40 +15,41 @@ body {
 }
 
 .wrapper.dark-theme {
-  background: $bg-color;
+
+  background: $dark-bg-color;
 
   nav.navbar {
-    background: $navbar-bg-color;
-    border-color: rgba($navbar-color, 0.3);
+    background: $dark-navbar-bg-color;
+    border-color: rgba($dark-navbar-color, 0.3);
 
     .navbar-brand {
-      color: lighten($navbar-color, 25%);
+      color: lighten($dark-navbar-color, 25%);
     }
 
     .left-nav {
       input.navbar-search {
         background: #282f48;
-        color: $navbar-color;
+        color: $dark-navbar-color;
         &::placeholder {
-          color: rgba($navbar-color, 0.6);
+          color: rgba($dark-navbar-color, 0.6);
         }
       }
     }
 
     .right-nav {
-      background: $navbar-bg-color;
+      background: $dark-navbar-bg-color;
     }
 
     .nav-link {
-      color: $navbar-color;
+      color: $dark-navbar-color;
 
       i {
-        border-color: $navbar-color;
+        border-color: $dark-navbar-color;
         background: #282f48;
       }
 
       &:hover {
-        color: lighten($navbar-color, 15%);
+        color: lighten($dark-navbar-color, 15%);
       }
     }
 
@@ -73,37 +74,37 @@ body {
     }
 
     .sidebar {
-      background: $sidebar-bg-color;
+      background: $dark-sidebar-bg-color;
 
       > div {
-        border-color: rgba($sidebar-color, 0.1);
+        border-color: rgba($dark-sidebar-color, 0.1);
       }
 
       a.sidebar-link {
-        color: $sidebar-color;
+        color: $dark-sidebar-color;
       }
 
       .sidebar-profile {
         .name {
-          color: $sidebar-color;
+          color: $dark-sidebar-color;
         }
 
         .role {
-          color: rgba($sidebar-color, 0.8);
+          color: rgba($dark-sidebar-color, 0.8);
         }
       }
 
       .sidebar-menu {
         .menu-header {
-          color: rgba($sidebar-color, 0.5);
+          color: rgba($dark-sidebar-color, 0.5);
         }
 
         .menu-items {
           a {
-            color: rgba($sidebar-color, 0.7);
+            color: rgba($dark-sidebar-color, 0.7);
 
             i {
-              color: $sidebar-icon-color;
+              color: $dark-sidebar-icon-color;
               color: #abb7da;
               color: rgba(140, 165, 239, 0.6);
               border: none;
@@ -114,7 +115,7 @@ body {
             &:hover,
             &.active {
               background: #f5f5f9;
-              color: rgba($sidebar-color, 0.9);
+              color: rgba($dark-sidebar-color, 0.9);
 
               i {
                 color: #95b0ff;
@@ -130,7 +131,7 @@ body {
     box-shadow: 1px 1px 2px rgba(#5b6582, 0.1);
 
     .card-title {
-      color: rgba($sidebar-color, 0.8);
+      color: rgba($dark-sidebar-color, 0.8);
     }
 
     .card-icon {
@@ -140,31 +141,31 @@ body {
     }
 
     .card-footer {
-      border-top: 1px solid $border-color;
+      border-top: 1px solid $dark-border-color;
       background: none;
     }
 
     .card-title {
-      border-bottom: 1px solid $border-color;
+      border-bottom: 1px solid $dark-border-color;
     }
   }
 
   .table {
     th,
     td {
-      border-top: 1px solid darken($border-color, 2%);
+      border-top: 1px solid darken($dark-border-color, 2%);
     }
 
     thead th {
-      border-bottom: 2px solid darken($border-color, 2%);
+      border-bottom: 2px solid darken($dark-border-color, 2%);
     }
 
     &.table-striped tbody tr:nth-of-type(odd) {
-      background-color: lighten($border-color, 1%);
+      background-color: lighten($dark-border-color, 1%);
     }
 
     &.table-hover tbody tr:hover {
-      background-color: lighten($border-color, 1%);
+      background-color: lighten($dark-border-color, 1%);
     }
   }
 

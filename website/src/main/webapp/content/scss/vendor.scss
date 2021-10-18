@@ -5,7 +5,7 @@ put Sass variables here:
 eg $input-color: red;
 ****************************/
 // Override Bootstrap variables
-@import '~bootswatch/dist/darkly/variables';
+// @import '~bootswatch/dist/darkly/variables';
 @import 'bootstrap-variables';
 // Import Bootstrap source files from node_modules
 @import '~bootstrap/scss/bootstrap';
@@ -16,6 +16,7 @@ eg $input-color: red;
 @import 'partials/navbar.scss';
 @import 'partials/sidebar';
 @import 'partials/themes';
+@import 'partials/themes-dark';
 
 @import 'partials/dashboard';
 
