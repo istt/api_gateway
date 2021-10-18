@@ -23,6 +23,13 @@
   </a>
   <div class="navbar-collapse collapse" id="navbarResponsive" [ngbCollapse]="isNavbarCollapsed" [ngSwitch]="account !== null">
     <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <button class="nav-link btn btn-circle" (click)="toggleTheme()">
+          <span>
+            <fa-icon icon="lightbulb"></fa-icon>
+          </span>
+        </button>
+      </li>
       <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
         <a class="nav-link" routerLink="/" (click)="collapseNavbar()">
           <span>

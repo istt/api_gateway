@@ -40,6 +40,7 @@ import {
   // jhipster-needle-add-icon-import
   faCompass,
   faUserCircle,
+  faLightbulb,
 } from '@fortawesome/free-solid-svg-icons';
 
 export const fontAwesomeIcons = [
@@ -84,4 +85,5 @@ export const fontAwesomeIcons = [
   // jhipster-needle-add-icon-import
   faCompass,
   faUserCircle,
+  faLightbulb,
 ];

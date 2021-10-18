@@ -6,6 +6,7 @@ import { Injectable } from '@angular/core';
 export class LayoutService {
   isSidebarPinned = false;
   isSidebarToggeled = false;
+  darkTheme = false;
 
   toggleSidebar(): void {
     this.isSidebarToggeled = !this.isSidebarToggeled;
@@ -20,5 +21,9 @@ export class LayoutService {
       isSidebarPinned: this.isSidebarPinned,
       isSidebarToggeled: this.isSidebarToggeled,
     };
+  }
+
+  toggleTheme(): void {
+    this.darkTheme = !this.darkTheme;
   }
 }

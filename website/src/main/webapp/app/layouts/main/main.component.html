@@ -1,5 +1,5 @@
 <jhi-page-ribbon></jhi-page-ribbon>
-<div class="wrapper default-theme" [ngClass]="getClasses()">
+<div class="wrapper" [ngClass]="getClasses()">
   <router-outlet name="navbar"></router-outlet>
   <main>
     <router-outlet name="sidebar" *ngIf="isAuthenticated()"></router-outlet>

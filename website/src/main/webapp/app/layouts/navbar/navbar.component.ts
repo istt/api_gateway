@@ -77,4 +77,8 @@ export class NavbarComponent implements OnInit {
     this.layoutService.toggleSidebar();
   }
 
+  toggleTheme(): void {
+    this.layoutService.toggleTheme()
+  }
+
 }

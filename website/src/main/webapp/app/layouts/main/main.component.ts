@@ -55,6 +55,8 @@ export class MainComponent implements OnInit {
     const classes = {
       'pinned-sidebar': this.layoutService.getSidebarStat().isSidebarPinned,
       'toggeled-sidebar': this.layoutService.getSidebarStat().isSidebarToggeled,
+      'dark-theme': this.layoutService.darkTheme,
+      'default-theme': !this.layoutService.darkTheme
     };
     return classes;
   }
