@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": "src/main/webapp/",
-    "outDir": "./target/classes/static/",
+    "outDir": "../web/",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitReturns": true,

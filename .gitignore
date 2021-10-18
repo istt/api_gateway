@@ -21,4 +21,5 @@
 /vendor/
 /web/
 /build/package
+/build/tmp
 pkged.go
