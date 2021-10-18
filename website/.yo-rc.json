@@ -7,7 +7,7 @@
     "authenticationType": "jwt",
     "applicationType": "monolith",
     "baseName": "website",
-    "jhipsterVersion": "7.1.0",
+    "jhipsterVersion": "7.3.0",
     "skipClient": false,
     "skipUserManagement": false,
     "skipCheckLengthOfIdentifier": false,
@@ -38,6 +38,9 @@
     "serviceDiscoveryType": false,
     "enableHibernateCache": true,
     "reactive": false,
-    "entities": []
+    "entities": [],
+    "enableGradleEnterprise": false,
+    "monorepository": true,
+    "skipCommitHook": true
   }
 }
