@@ -40,11 +40,12 @@ func (s Sort) MarshalText() ([]byte, error) {
 }
 
 // Validate ensure that the sort contains a valid property and direction
-func (s Sort) Validate() error {
+func (s *Sort) Validate() error {
 	switch strings.ToUpper(s.Direction) {
-	case SORT_ASC, SORT_DESC:
-		return nil
+	case SORT_DESC:
+		s.Direction = SORT_DESC
 	default:
-		return fmt.Errorf("unknown sort direction: %s", s.Direction)
+		s.Direction = SORT_ASC
 	}
+	return nil
 }
