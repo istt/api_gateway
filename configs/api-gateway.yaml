@@ -1,14 +1,45 @@
-# HTTP server configuration
+# HTTP listen address
 http:
-  # server listener
-  listen: "127.0.0.1:8080"
+  listen: 127.0.0.1:18080
+# mongodb connection
+mongodb:
+  uri: mongodb://127.0.0.1:27017/
+  database: test
 
-  # Proxy path in upstream
-  proxy:
-    /services/s3: 
-      - "127.0.0.1:3007"
-      - "127.0.0.1:3008"
-      - "127.0.0.1:3009"
-  # Authentication if need
-  security:
-    jwt-secret: "YWQ3NDMwM2JlZTk4MTVmZDMwZGZkYjhlNjQxNTM1YzQwNzFjNDQ4Nzk5NzQxMTA2N2U0NzVkN2I0YjkzOTgzMDUwY2Q4ODdhYTE2NjZkNWExYzM5N2EyMGI0OTIwOWYzMGNjYzc3NzNmOWFkMDQzYTJmMWQ5MjE0MGFlMDhlNWM="
+# Security mechanism, here we use Json Web Token as the authencation method
+security:
+  # secret to hash the Authorization Token
+  jwt-secret: YzZlZWRiZTVjMjNlNzdmNWNkODI2Y2U0MGNjMjJkM2UgIC0K
+  # routes that are skip from Json Web Token, let every one to access
+  skip-auth:
+    # File upload and download endpoint
+    - /api/file-download
+    - /api/file-upload
+
+  # Available role of the system. Other micro-services may add more roles to restrict user login. Must come in pair with Angular app.
+  authorities:
+    - ROLE_ADMIN
+    - ROLE_USER
+    - SALES
+    - DEVELOPER
+    - CUSTOMER
+    - SUPPLIER
+    - MNP
+# Reverse Proxy routes to other micro-services
+services:
+  # ms-1 run on port 19061
+  ms-1:
+    - http://app1.localnet:19061
+    - http://app2.localnet:19061
+  # Traffic Generator and SMSC simulator merge into one
+  ms-2:
+    - http://app1.localnet:19062
+    - http://app2.localnet:19062
+
+# S3 File Storage for configuration repositories for Seaweedfs, Ceph or AWS object storage. Must in sync with traffic-generator service for file upload / download
+s3:
+  endpoint: "play.min.io"
+  accessKeyID: "Q3AM3UQ867SPQQA43P2F"
+  secretAccessKey: "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
+  useSSL: true
+  bucket: "istt_api_gateway"

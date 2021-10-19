@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/golang-jwt/jwt"
-	"github.com/istt/api_gateway/internal/app"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/istt/api_gateway/pkg/fiber/services"
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,32 +14,32 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// UserServiceMongodb act as a placeholders for demospurpose of how to create the implementation for this service
+// UserServiceMongoDB act as a placeholders for demospurpose of how to create the implementation for this service
 // following username / email / password / authorities are availble:
 //   admin@localhost / admin / admin / ROLE_ADMIN, ROLE_USER
 //	 user@localhost / user / user / ROLE_USER
-type UserServiceMongodb struct {
+type UserServiceMongoDB struct {
 	userCollection *mongo.Collection
 }
 
-// NewUserServiceMongodb create the single-ton instance for this service
-func NewUserServiceMongodb() services.UserService {
-	return &UserServiceMongodb{
-		userCollection: app.MongoDB.Collection("user"),
+// NewUserServiceMongoDB create the single-ton instance for this service
+func NewUserServiceMongoDB(userCollection *mongo.Collection) services.UserService {
+	return &UserServiceMongoDB{
+		userCollection: userCollection,
 	}
 }
 
 // CheckPasswordHash compare password with hash
-func (svc *UserServiceMongodb) CheckPasswordHash(password, hash string) bool {
+func (svc *UserServiceMongoDB) CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 
 }
 
 // GetUserByUsername return user information based on login username
-func (svc *UserServiceMongodb) GetUserByUsername(ctx context.Context, login string) (*shared.ManagedUserDTO, error) {
+func (svc *UserServiceMongoDB) GetUserByUsername(ctx context.Context, login string) (*shared.ManagedUserDTO, error) {
 	result := &shared.ManagedUserDTO{}
-	// Search mongodb collection for user info
+	// Search MongoDB collection for user info
 	if err := svc.userCollection.FindOne(ctx, bson.M{"login": login}).Decode(result); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
@@ -52,7 +51,7 @@ func (svc *UserServiceMongodb) GetUserByUsername(ctx context.Context, login stri
 }
 
 // HashPassword hash the given password with any kind of encrypt for password. Can be MD5, SHA1 or BCrypt
-func (svc *UserServiceMongodb) HashPassword(password string) (string, error) {
+func (svc *UserServiceMongoDB) HashPassword(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
 		log.Println(err)
@@ -62,11 +61,11 @@ func (svc *UserServiceMongodb) HashPassword(password string) (string, error) {
 }
 
 // IsValidToken check if current login match the given jwt subject
-func (svc *UserServiceMongodb) IsValidToken(t *jwt.Token, login string) bool {
+func (svc *UserServiceMongoDB) IsValidToken(t *jwt.Token, login string) bool {
 	if err := t.Claims.Valid(); err != nil {
 		return false
 	}
-	if standardClaims, ok := t.Claims.(jwt.StandardClaims); ok {
+	if standardClaims, ok := t.Claims.(jwt.RegisteredClaims); ok {
 		return standardClaims.Subject == login
 	}
 	if mapClaims, ok := t.Claims.(jwt.MapClaims); ok {
@@ -78,7 +77,7 @@ func (svc *UserServiceMongodb) IsValidToken(t *jwt.Token, login string) bool {
 }
 
 // RegisterAccount register for a new account
-func (svc *UserServiceMongodb) RegisterAccount(ctx context.Context, account *shared.ManagedUserDTO) error {
+func (svc *UserServiceMongoDB) RegisterAccount(ctx context.Context, account *shared.ManagedUserDTO) error {
 
 	Insertdata, err := svc.userCollection.InsertOne(ctx, account)
 	if err != nil {
@@ -91,7 +90,7 @@ func (svc *UserServiceMongodb) RegisterAccount(ctx context.Context, account *sha
 }
 
 // SaveAccount save the current account
-func (svc *UserServiceMongodb) SaveAccount(ctx context.Context, account *shared.ManagedUserDTO) error {
+func (svc *UserServiceMongoDB) SaveAccount(ctx context.Context, account *shared.ManagedUserDTO) error {
 	if account.Id == "" {
 		res, err := svc.userCollection.InsertOne(context.Background(), account)
 		if err != nil {

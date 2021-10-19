@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/istt/api_gateway/pkg/fiber/services"
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 )
@@ -79,7 +79,7 @@ func (svc *UserServiceDummy) IsValidToken(t *jwt.Token, login string) bool {
 	if err := t.Claims.Valid(); err != nil {
 		return false
 	}
-	if standardClaims, ok := t.Claims.(jwt.StandardClaims); ok {
+	if standardClaims, ok := t.Claims.(jwt.RegisteredClaims); ok {
 		return standardClaims.Subject == login
 	}
 	if mapClaims, ok := t.Claims.(jwt.MapClaims); ok {

@@ -21,12 +21,8 @@ var (
 // MongoDBConfig provide default settings for MongoDB
 func MongoDBConfig() {
 	Config.Load(confmap.Provider(map[string]interface{}{
-		"mongodb.username": "root",
-		"mongodb.password": "",
-		"mongodb.host":     "127.0.0.1",
-		"mongodb.port":     27017,
-		"mongodb.authdb":   "",
-		"mongodb.name":     "test",
+		"mongodb.uri":      "mongodb://localhost:27017/",
+		"mongodb.database": "test",
 	}, "."), nil)
 
 }
@@ -39,15 +35,7 @@ const (
 // MongoDBInit create mongodb connection and assign it back to var MongoDB above
 func MongoDBInit() {
 	var err error
-
-	// mongodb := fmt.Sprintf("%s:%s@%s:%d/test?retryWrites=true&w=majority",
-	// 	Config.MustString("mongodb.username"),
-	// 	Config.String("mongodb.password"),
-	// 	Config.MustString("mongodb.host"),
-	// 	Config.MustInt("mongodb.port"),
-	//
-	// FIXME: using fmt.Sprintf
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017/"))
+	client, err := mongo.NewClient(options.Client().ApplyURI(Config.MustString("mongodb.uri")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,5 +52,5 @@ func MongoDBInit() {
 	}
 	MongoClient = client
 
-	MongoDB = client.Database(Config.MustString("mongodb.name"))
+	MongoDB = client.Database(Config.MustString("mongodb.database"))
 }

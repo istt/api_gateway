@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"strings"
 
@@ -9,13 +10,14 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/proxy"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/istt/api_gateway/internal/app"
 	"github.com/istt/api_gateway/internal/app/api-gateway/repositories"
 	authImpl "github.com/istt/api_gateway/internal/app/api-gateway/services/impl"
-	"github.com/istt/api_gateway/internal/app/api-gateway/web/rest"
+	"github.com/istt/api_gateway/internal/app/s3proxy"
 	"github.com/istt/api_gateway/pkg/fiber/authjwt"
 	authApi "github.com/istt/api_gateway/pkg/fiber/authjwt/web/rest"
-	"github.com/istt/api_gateway/pkg/fiber/middleware/filter"
+	"github.com/istt/api_gateway/pkg/fiber/fiberprometheus"
 	"github.com/markbates/pkger"
 )
 
@@ -35,9 +37,10 @@ func main() {
 
 	// 3 - bring up components
 	app.MongoDBInit()
+
 	// + inject UserServiceMongoDB into application
-	userRepo := repositories.NewUserRepositoryBuntDB(app.Config.MustString("buntdb.path"))
-	userSvc := authImpl.NewUserServiceDummy()
+	userRepo := repositories.NewUserRepositoryMongoDB(app.MongoDB.Collection("user"))
+	userSvc := authImpl.NewUserServiceMongoDB(app.MongoDB.Collection("user"))
 	// 4 - setup the web server
 	srv := fiber.New(fiber.Config{
 		BodyLimit: 50 * 1024 * 1024,
@@ -52,22 +55,29 @@ func main() {
 	})
 	configureFiber(srv)
 
-	// + jwt secret support
+	prometheus := fiberprometheus.New("api-gateway")
+	prometheus.RegisterAt(srv, "/metrics")
+	srv.Use(prometheus.Middleware)
+
 	authjwt.USER_RESOURCE = authApi.NewDefaultUserResource(userSvc, userRepo)
 	authjwt.ACCOUNT_RESOURCE = authApi.NewDefaultAccountResource(userSvc)
 	authjwt.SetupAuthJWT(srv, app.Config.MustString("security.jwt-secret"), app.Config.Strings("security.skip-auth")...)
 	authjwt.SetupRoutes(srv)
-	setupRoutes(srv)
-	setupProxy(srv)
 
-	log.Fatal(srv.Listen(app.Config.String("http.listen")))
+	s3proxy.SetupRoutes(srv)
+	setupProxy(srv, prometheus.Middleware)
+	if app.Config.String("https.listen") != "" {
+		log.Fatal(srv.ListenTLS(app.Config.String("https.listen"), app.Config.MustString("https.cert"), app.Config.MustString("https.key")))
+	} else {
+		log.Fatal(srv.Listen(app.Config.String("http.listen")))
+	}
 }
 
 // configureFiber start the fiber with common settings
 func configureFiber(srv *fiber.App) {
 	staticAsset := filesystem.New(filesystem.Config{
 		Next: func(c *fiber.Ctx) bool {
-			return strings.HasPrefix(c.Path(), "/api")
+			return strings.HasPrefix(c.Path(), "/api") || strings.HasPrefix(c.Path(), "/services")
 		},
 		Root: pkger.Dir("/web"),
 	})
@@ -77,18 +87,30 @@ func configureFiber(srv *fiber.App) {
 		TimeFormat: "2006-01-02T15:04:05-0700",
 	}))
 
-	// srv.Use(recover.New())
+	srv.Use(recover.New())
+	srv.Get("/management/info", func(c *fiber.Ctx) error {
+		return fiber.NewError(fiber.StatusOK, "ok")
+	})
+	srv.Get("/management/health", func(c *fiber.Ctx) error {
+		return fiber.NewError(fiber.StatusOK, "ok")
+	})
 }
 
 // setupProxy setup the reverse proxy based on
-func setupProxy(srv *fiber.App) {
-	for k, v := range app.Config.StringsMap("http.proxy") {
-		log.Printf("proxy request on /%s to %v", k, v)
-		srv.Use(k, proxy.Balancer(proxy.Config{
+func setupProxy(srv *fiber.App, handlers interface{}) {
+	for k, v := range app.Config.StringsMap("services") {
+		serviceNamespace := fmt.Sprintf("/services/%s/", strings.TrimRight(k, "/"))
+		log.Printf("proxy request on %s to %v", serviceNamespace, v)
+		srv.Use(serviceNamespace, handlers, proxy.Balancer(proxy.Config{
 			Servers: v,
 			ModifyRequest: func(c *fiber.Ctx) error {
 				c.Request().Header.Add("X-Real-IP", c.IP())
-				c.Path(c.Path()[len(k)+1:])
+				c.Path(c.Path()[len(serviceNamespace):])
+				// FIXME: not sure why but for uploading files, this must be set
+				if strings.Contains(string(c.Request().Header.ContentType()), fiber.MIMEMultipartForm) {
+					b := c.Body()
+					c.Request().SetBodyRaw(b)
+				}
 				return nil
 			},
 			ModifyResponse: func(c *fiber.Ctx) error {
@@ -97,27 +119,4 @@ func setupProxy(srv *fiber.App) {
 			},
 		}))
 	}
-}
-
-// setupRoutes setup the route for application
-func setupRoutes(app *fiber.App) {
-	// + Jhipster endpoint for ROLE_USER
-	app.Get("api/account", rest.GetAccount)                                 // getAccount
-	app.Post("api/account", rest.SaveAccount)                               // saveAccount
-	app.Post("api/account/change-password", rest.ChangePassword)            // ChangePassword
-	app.Post("api/account/reset-password/finish", rest.FinishPasswordReset) // finishPasswordReset
-	app.Post("api/account/reset-password/init", rest.RequestPasswordReset)  // requestPasswordReset
-
-	// + account public end point
-	app.Get("api/activate", rest.ActivateAccount)  // activateAccount
-	app.Post("api/authenticate", rest.Login)       // isAuthenticated
-	app.Post("api/register", rest.RegisterAccount) // registerAccount
-
-	// + user Management routes
-	app.Get("api/authorities", authjwt.HasAnyAuthority("ROLE_ADMIN"), rest.GetAuthorities)
-	app.Get("api/admin/users", authjwt.HasAnyAuthority("ROLE_ADMIN"), filter.New(), rest.GetAllUser)
-	app.Get("api/admin/users/:id", authjwt.HasAnyAuthority("ROLE_ADMIN"), rest.GetUser)
-	app.Post("api/admin/users", authjwt.HasAnyAuthority("ROLE_ADMIN"), rest.CreateUser)
-	app.Put("api/admin/users", authjwt.HasAnyAuthority("ROLE_ADMIN"), rest.UpdateUser)
-	app.Delete("api/admin/users/:id", authjwt.HasAnyAuthority("ROLE_ADMIN"), rest.DeleteUser)
 }

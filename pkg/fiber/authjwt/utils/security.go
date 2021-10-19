@@ -10,7 +10,7 @@ import (
 	"github.com/istt/api_gateway/pkg/fiber/authjwt/consts"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 const (

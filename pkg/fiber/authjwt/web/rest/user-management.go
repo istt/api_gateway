@@ -2,11 +2,13 @@ package rest
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/istt/api_gateway/pkg/fiber/authjwt/utils"
+	"github.com/istt/api_gateway/pkg/fiber/middleware/filter"
 	"github.com/istt/api_gateway/pkg/fiber/services"
 	"github.com/istt/api_gateway/pkg/fiber/shared"
 )
@@ -33,6 +35,9 @@ func NewDefaultUserResource(svc services.UserService, repo services.UserReposito
 }
 
 func (r *DefaultUserResource) GetAllUser(c *fiber.Ctx) error {
+	if predicate, ok := c.Locals(filter.ContextKeyDefault).(filter.Filter); ok {
+		log.Printf("find all user with predicate: %+v", predicate)
+	}
 	rows, err := r.Repo.FindAll()
 	if err != nil {
 		return err
@@ -52,7 +57,11 @@ func (r *DefaultUserResource) GetUser(c *fiber.Ctx) error {
 	}
 	user, err := r.Repo.FindById(id)
 	if err != nil {
-		return err
+		userByLogin, err := r.Repo.FindByLogin(id)
+		if err != nil {
+			return fiber.NewError(fiber.StatusNotFound, err.Error())
+		}
+		return c.JSON(userByLogin)
 	}
 	return c.JSON(user)
 }
@@ -97,6 +106,7 @@ func (r *DefaultUserResource) CreateUser(c *fiber.Ctx) error {
 	return c.JSON(user.UserDTO)
 }
 
+// UpdateUser update the user information
 func (r *DefaultUserResource) UpdateUser(c *fiber.Ctx) error {
 	var user shared.ManagedUserDTO
 	if err := c.BodyParser(&user); err != nil {
@@ -129,13 +139,20 @@ func (r *DefaultUserResource) UpdateUser(c *fiber.Ctx) error {
 	return c.JSON(user.UserDTO)
 }
 
+// DeleteUser try to delete one row from user table, which can have ID or Login match given path variable
 func (r *DefaultUserResource) DeleteUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	if id == "" {
 		return fiber.ErrBadRequest
 	}
 	if err := r.Repo.DeleteById(id); err != nil {
-		return err
+		userWithLogin, err := r.Repo.FindByLogin(id)
+		if err != nil {
+			return err
+		}
+		if err := r.Repo.Delete(userWithLogin); err != nil {
+			return fiber.NewError(fiber.StatusNotFound, err.Error())
+		}
 	}
 	return c.SendStatus(fiber.StatusNoContent)
 }
