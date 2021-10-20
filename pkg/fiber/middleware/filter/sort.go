@@ -17,18 +17,19 @@ type Sort struct {
 
 // UnmarshalText convert `property,direction` into property, direction attribute of sort
 func (s *Sort) UnmarshalText(text []byte) error {
-	if len(text) == 0 {
+	txt := strings.TrimSpace(string(text))
+	if len(txt) == 0 {
 		return fmt.Errorf("empty text")
 	}
-	comma := strings.Index(string(text), ",")
+	comma := strings.Index(txt, ",")
 	if comma == -1 {
-		s.Property = string(text)
+		s.Property = txt
 		s.Direction = SORT_ASC
 	} else {
-		s.Property = string(text[0:comma])
-		s.Direction = string(text[comma+1:])
+		s.Property = txt[0:comma]
+		s.Direction = txt[comma+1:]
 	}
-	return s.Validate()
+	return nil
 }
 
 // MarshalText convert the Sort back into text string like `properties,sortDirection`
@@ -41,6 +42,9 @@ func (s Sort) MarshalText() ([]byte, error) {
 
 // Validate ensure that the sort contains a valid property and direction
 func (s Sort) Validate() error {
+	if len(s.Property) == 0 {
+		return fmt.Errorf("missing sort property")
+	}
 	switch strings.ToUpper(s.Direction) {
 	case SORT_ASC, SORT_DESC:
 		return nil
