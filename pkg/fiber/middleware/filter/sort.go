@@ -46,9 +46,10 @@ func (s Sort) Validate() error {
 		return fmt.Errorf("missing sort property")
 	}
 	switch strings.ToUpper(s.Direction) {
-	case SORT_ASC, SORT_DESC:
-		return nil
+	case SORT_DESC:
+		s.Direction = SORT_DESC
 	default:
-		return fmt.Errorf("unknown sort direction: %s", s.Direction)
+		s.Direction = SORT_ASC
 	}
+	return nil
 }
