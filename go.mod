@@ -32,7 +32,7 @@ require (
 	github.com/rs/xid v1.3.0 // indirect
 	github.com/valyala/fasthttp v1.31.0 // indirect
 	go.mongodb.org/mongo-driver v1.7.0 // indirect
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
 	golang.org/x/sys v0.0.0-20211015200801-69063c4bb744 // indirect
 	golang.org/x/text v0.3.7 // indirect

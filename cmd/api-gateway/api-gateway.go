@@ -18,6 +18,7 @@ import (
 	"github.com/istt/api_gateway/pkg/fiber/authjwt"
 	authApi "github.com/istt/api_gateway/pkg/fiber/authjwt/web/rest"
 	"github.com/istt/api_gateway/pkg/fiber/fiberprometheus"
+	"github.com/istt/api_gateway/pkg/fiber/instances"
 	"github.com/markbates/pkger"
 )
 
@@ -37,7 +38,9 @@ func main() {
 	// 3 - bring up components
 	// + inject UserServiceMongoDB into application
 	userRepo := repositories.NewUserRepositoryDummy()
-	userSvc := authImpl.NewUserServiceDummy()
+	instances.UserRepo = userRepo
+	userSvc := authImpl.NewUserServiceDefault(userRepo)
+	instances.UserService = userSvc
 	// 4 - setup the web server
 	srv := fiber.New(fiber.Config{
 		BodyLimit: 50 * 1024 * 1024,
